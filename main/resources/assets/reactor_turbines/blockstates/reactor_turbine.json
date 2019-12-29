@@ -1,0 +1,7 @@
+{
+    "variants": {
+        "normal": [
+            { "model": "reactor_turbines:reactor_turbine" }
+        ]
+    }
+}

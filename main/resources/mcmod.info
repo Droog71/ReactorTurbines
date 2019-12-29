@@ -1,0 +1,16 @@
+[
+{
+  "modid": "reactor_turbines",
+  "name": "Reactor Turbines",
+  "description": "Addon for IC2 nuclear reactors.",
+  "version": "${version}",
+  "mcversion": "${mcversion}",
+  "url": "",
+  "updateUrl": "",
+  "authorList": ["Droog71"],
+  "credits": "Droog71",
+  "logoFile": "",
+  "screenshots": [],
+  "dependencies": []
+}
+]

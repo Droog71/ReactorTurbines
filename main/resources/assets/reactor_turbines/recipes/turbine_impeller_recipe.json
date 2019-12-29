@@ -1,0 +1,19 @@
+{ 
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " P ",
+    "PVP",
+    " P "  ],
+  "key": {
+    "V": {
+        "item": "ic2:component_heat_vent"
+    },
+    "P": {
+        "item": "ic2:plating"
+    }
+},
+  "result": {
+    "item": "reactor_turbines:turbine_impeller",
+    "data": 0
+  }
+}

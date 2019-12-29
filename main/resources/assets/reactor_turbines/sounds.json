@@ -1,0 +1,14 @@
+{
+  "turbine": {
+    "category": "block",
+    "sounds": [ "reactor_turbines:turbine" ]
+  },
+  "steam": {
+    "category": "block",
+    "sounds": [ "reactor_turbines:steam" ]
+  },
+  "alarm": {
+    "category": "block",
+    "sounds": [ "reactor_turbines:alarm" ]
+  }
+}

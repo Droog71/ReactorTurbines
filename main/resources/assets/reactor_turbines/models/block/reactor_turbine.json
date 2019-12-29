@@ -1,0 +1,8 @@
+{
+    "parent": "block/cube_bottom_top",
+    "textures": {
+        "side": "reactor_turbines:blocks/reactor_turbine_side",
+        "bottom": "reactor_turbines:blocks/reactor_turbine_bottom",
+        "top": "reactor_turbines:blocks/reactor_turbine_top"
+    }
+}
