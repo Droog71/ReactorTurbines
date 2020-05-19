@@ -21,7 +21,7 @@ public class ReactorTurbineBlocks
 	
 	public static void init() 
 	{
-		reactorTurbine = new ReactorTurbine("reactor_turbine",Material.ROCK).setCreativeTab(ReactorTurbines.tabReactorTurbines);
+		reactorTurbine = new ReactorTurbine("reactor_turbine",Material.IRON).setCreativeTab(ReactorTurbines.tabReactorTurbines);
 		turbineTileEntity = new ReactorTurbineTileEntity();
 		GameRegistry.registerTileEntity(turbineTileEntity.getClass(), "reactor_turbines:turbineTileEntity");
 	}
