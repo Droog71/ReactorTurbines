@@ -2,6 +2,7 @@ package com.droog71.reactor_turbines.init;
 
 import com.droog71.reactor_turbines.ReactorTurbines;
 import com.droog71.reactor_turbines.blocks.energy.ReactorTurbine;
+import com.droog71.reactor_turbines.material.TurbineMaterial;
 import com.droog71.reactor_turbines.tileentity.ReactorTurbineTileEntity;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
@@ -21,7 +22,7 @@ public class ReactorTurbineBlocks
 	
 	public static void init() 
 	{
-		reactorTurbine = new ReactorTurbine("reactor_turbine",Material.IRON).setCreativeTab(ReactorTurbines.tabReactorTurbines);
+		reactorTurbine = new ReactorTurbine("reactor_turbine",TurbineMaterial.TURBINE).setCreativeTab(ReactorTurbines.tabReactorTurbines);
 		turbineTileEntity = new ReactorTurbineTileEntity();
 		GameRegistry.registerTileEntity(turbineTileEntity.getClass(), "reactor_turbines:turbineTileEntity");
 	}

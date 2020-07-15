@@ -2,6 +2,8 @@ package com.droog71.reactor_turbines.tileentity;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import com.droog71.reactor_turbines.config.ConfigHandler;
 import com.droog71.reactor_turbines.init.ReactorTurbineBlocks;
 import com.droog71.reactor_turbines.init.ReactorTurbineSounds;
 import ic2.api.energy.prefab.BasicSource;
@@ -259,10 +261,10 @@ public class ReactorTurbineTileEntity extends TileEntity implements ITickable
 										}
 										if (reactorHeat >= 1) //The reactor is hot enough to operate the turbine.
 										{
-											currentGeneration = 512 * currentHeatPercentage; //EU added to buffer each tick.
+											currentGeneration = 512 * currentHeatPercentage * ConfigHandler.getPowerMultiplier(); //EU added to buffer each tick.
 											if (currentGeneration > 512)
 											{
-												currentGeneration = 512; //Maximum eu added to buffer each tick.
+												currentGeneration = 512 * ConfigHandler.getPowerMultiplier(); //Maximum eu added to buffer each tick.
 											}
 											ic2EnergySource.addEnergy(currentGeneration); // Add the calculated eu to the ic2 energy source buffer.
 											reactor.addOutput((float)currentGeneration); //Set reactor output to the output of the turbines.
@@ -404,10 +406,10 @@ public class ReactorTurbineTileEntity extends TileEntity implements ITickable
 										{
 											if (reactorHeat >= 1)
 											{
-												currentGeneration = 512 * currentHeatPercentage; //EU added to buffer each tick.
+												currentGeneration = 512 * currentHeatPercentage * ConfigHandler.getPowerMultiplier(); //EU added to buffer each tick.
 												if (currentGeneration > 512)
 												{
-													currentGeneration = 512; //Maximum eu added to buffer each tick.
+													currentGeneration = 512 * ConfigHandler.getPowerMultiplier(); //Maximum eu added to buffer each tick.
 												}
 												ic2EnergySource.addEnergy(currentGeneration); // Add the calculated eu to the ic2 energy source buffer.
 												turbineSoundLoopTimer++;
