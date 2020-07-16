@@ -2,6 +2,7 @@ package com.droog71.reactor_turbines;
 
 import org.apache.logging.log4j.Logger;
 import com.droog71.reactor_turbines.common.CommonProxy;
+import com.droog71.reactor_turbines.config.ConfigHandler;
 import com.droog71.reactor_turbines.init.ReactorTurbineBlocks;
 import com.droog71.reactor_turbines.init.ReactorTurbineItems;
 import com.droog71.reactor_turbines.init.ReactorTurbineSounds;
@@ -21,7 +22,7 @@ public class ReactorTurbines
 {
     public static final String MODID = "reactor_turbines";
     public static final String NAME = "Reactor Turbines";
-    public static final String VERSION = "1.1.6";
+    public static final String VERSION = "1.1.7";
     private static Logger logger;
 
     @Instance
@@ -37,6 +38,7 @@ public class ReactorTurbines
 		ReactorTurbineBlocks.init();
     	ReactorTurbineItems.init();
     	ReactorTurbineSounds.init();
+    	ConfigHandler.getPowerMultiplier();
         logger = event.getModLog();
     }
 
