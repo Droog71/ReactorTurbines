@@ -8,14 +8,12 @@ import com.droog71.reactor_turbines.init.ReactorTurbineBlocks;
 import com.droog71.reactor_turbines.init.ReactorTurbineSounds;
 import ic2.api.energy.prefab.BasicSource;
 import net.minecraft.block.Block;
-import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ITickable;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
 
 public class ReactorTurbineTileEntity extends TileEntity implements ITickable
 {
@@ -31,7 +29,6 @@ public class ReactorTurbineTileEntity extends TileEntity implements ITickable
 	private boolean noReactor;
 	private boolean built;
 	private boolean located;
-	private boolean hasWater;
 	private boolean overHeating;
 	private BlockPos thisTurbineWaterPos;
 	private BlockPos mainTurbinePos;
