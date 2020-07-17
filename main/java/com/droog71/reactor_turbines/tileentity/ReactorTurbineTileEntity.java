@@ -43,7 +43,8 @@ public class ReactorTurbineTileEntity extends TileEntity implements ITickable
 	public int numTurbines;
 	public boolean hasReactor;
 	public boolean isAdjacent;
-	public boolean mainTurbineReset;
+	public boolean mainTurbineLoaded;
+	public boolean adjacentTurbinesLoaded;
 	public boolean enclosureIntact;
 	private List<BlockPos> enclosurePositions = new ArrayList<BlockPos>();
 	private List<BlockPos> reactorAdjacentPositions = new ArrayList<BlockPos>();
@@ -193,6 +194,16 @@ public class ReactorTurbineTileEntity extends TileEntity implements ITickable
 					}
 					if (numTurbines == 5)
 					{
+						if (mainTurbineLoaded == true && adjacentTurbinesLoaded == false) //Replace adjacent turbines when the world is loaded so IC2 cables will connect to them.
+						{
+							for (BlockPos p : adjacentTurbinePositions)
+							{
+								world.setBlockToAir(p);
+								world.removeTileEntity(p);
+								world.setBlockState(p, ReactorTurbineBlocks.reactorTurbine.getDefaultState());
+							}
+							adjacentTurbinesLoaded = true;
+						}
 						if (built == false) //Initial assembly of the enclosure.
 						{
 							for (BlockPos p : enclosurePositions)
@@ -384,12 +395,12 @@ public class ReactorTurbineTileEntity extends TileEntity implements ITickable
 					ReactorTurbineTileEntity turbine = ((ReactorTurbineTileEntity) mainTurbine); //The main turbine.
 					if (turbine != null)
 					{
-						if (turbine.mainTurbineReset == false) //Sometimes turbines don't interact with the reactor correctly when the world is loaded. This is a workaround.
+						if (turbine.mainTurbineLoaded == false) //Replace the main turbine when the world is loaded so it will reconnect to the reactor.
 						{
 							world.setBlockToAir(mainTurbinePos);
 							world.removeTileEntity(mainTurbinePos);
 							world.setBlockState(mainTurbinePos, ReactorTurbineBlocks.reactorTurbine.getDefaultState());
-							((ReactorTurbineTileEntity) world.getTileEntity(mainTurbinePos)).mainTurbineReset = true;
+							((ReactorTurbineTileEntity) world.getTileEntity(mainTurbinePos)).mainTurbineLoaded = true;
 						}
 						else
 						{
