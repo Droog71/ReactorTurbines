@@ -42,8 +42,18 @@ public class ConfigHandler
         }
         else
         {
-        	try 
-        	{
+        	createConfigFile();
+        }
+        return 1.0f;
+	}
+	
+	public static void createConfigFile()
+	{
+		try 
+    	{
+			File configFile = new File(System.getProperty("user.dir")+"/config/reactor_turbines.cfg");
+			if (!configFile.exists())
+	        {
 				configFile.createNewFile();
 				FileWriter f;    			
 			    try 
@@ -57,12 +67,12 @@ public class ConfigHandler
 			    	System.out.println("Reactor turbines mod failed to write to config file!");
 			        ioe.printStackTrace();
 			    } 
-			} 
-        	catch (IOException e) 
-        	{
-				e.printStackTrace();
-			}
-        }
-        return 1.0f;
+	        }			
+		} 
+    	catch (IOException e) 
+    	{
+    		System.out.println("Reactor turbines mod failed to create config file!");
+			e.printStackTrace();
+		}
 	}
 }

@@ -21,7 +21,7 @@ public class ReactorTurbines
 {
     public static final String MODID = "reactor_turbines";
     public static final String NAME = "Reactor Turbines";
-    public static final String VERSION = "1.1.9";
+    public static final String VERSION = "1.2.0";
     private static Logger logger;
 
     @Instance
@@ -33,11 +33,10 @@ public class ReactorTurbines
     @EventHandler
     public void preInit(FMLPreInitializationEvent event)
     {
-		System.out.println("Reactor turbines mod found ic2 installed, good to go!");
 		ReactorTurbineBlocks.init();
     	ReactorTurbineItems.init();
     	ReactorTurbineSounds.init();
-    	ConfigHandler.getPowerMultiplier();
+    	ConfigHandler.createConfigFile();
         logger = event.getModLog();
     }
 
