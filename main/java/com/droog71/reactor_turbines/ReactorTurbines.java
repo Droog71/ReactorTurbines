@@ -21,7 +21,7 @@ public class ReactorTurbines
 {
     public static final String MODID = "reactor_turbines";
     public static final String NAME = "Reactor Turbines";
-    public static final String VERSION = "1.2.0";
+    public static final String VERSION = "1.2.1";
     private static Logger logger;
 
     @Instance

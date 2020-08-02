@@ -1,7 +1,8 @@
 package com.droog71.reactor_turbines.blocks.energy;
 
 import com.droog71.reactor_turbines.blocks.BlockBase;
-import com.droog71.reactor_turbines.tileentity.ReactorTurbineTileEntity;
+import com.droog71.reactor_turbines.tile_entity.ReactorTurbineTileEntity;
+
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.tileentity.TileEntity;
