@@ -7,6 +7,7 @@ import com.droog71.reactor_turbines.init.ReactorTurbineSounds;
 import ic2.api.energy.prefab.BasicSource;
 import ic2.api.energy.tile.IEnergyTile;
 import ic2.api.reactor.IReactor;
+import ic2.api.network.INetworkDataProvider;
 import net.minecraft.block.Block;
 import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
@@ -149,11 +150,15 @@ public class ReactorTurbineTileEntity extends TileEntity implements ITickable
 		{
 			if (world.getBlockState(positions.reactorPos).getBlock() != null)
 			{
-				reactor = (IReactor) world.getTileEntity(positions.reactorPos);
-				if (reactor != null)
-				{					
-					isMainTurbine = true; // This is the main turbine, directly over the reactor.						
-					return true;
+				TileEntity reactorPosTileEntity = world.getTileEntity(positions.reactorPos);
+				if (reactorPosTileEntity != null)
+				{
+					if (reactorPosTileEntity instanceof IReactor)
+					{
+						reactor = (IReactor) reactorPosTileEntity;
+						isMainTurbine = true; // This is the main turbine, directly over the reactor.						
+						return true;
+					}
 				}
 			}
 		}
@@ -372,12 +377,12 @@ public class ReactorTurbineTileEntity extends TileEntity implements ITickable
 			{
 				if (world.getBlockState(p).getBlock() != null)
 				{
-					TileEntity disallowedConnection = world.getTileEntity(p);
-					if (disallowedConnection != null)
+					TileEntity tE = world.getTileEntity(p);
+					if (tE != null)
 					{
-						if (disallowedConnection instanceof IEnergyTile || disallowedConnection instanceof ic2.core.block.wiring.TileEntityTransformer || disallowedConnection instanceof ic2.core.block.wiring.TileEntityElectricBlock || disallowedConnection instanceof ic2.core.block.machine.tileentity.TileEntityStandardMachine || disallowedConnection instanceof ic2.core.block.machine.tileentity.TileEntityElectricMachine || disallowedConnection instanceof ic2.core.block.wiring.TileEntityCable)
+						if (tE instanceof IEnergyTile || tE instanceof INetworkDataProvider || tE instanceof ic2.api.tile.IEnergyStorage)
 						{
-							world.setBlockToAir(p); 
+							world.setBlockToAir(p);
 						}
 					}
 				}
