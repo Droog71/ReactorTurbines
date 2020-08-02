@@ -5,6 +5,8 @@ import com.droog71.reactor_turbines.forge_energy.EnergyStorage;
 import com.droog71.reactor_turbines.init.ReactorTurbineBlocks;
 import com.droog71.reactor_turbines.init.ReactorTurbineSounds;
 import ic2.api.energy.prefab.BasicSource;
+import ic2.api.energy.tile.IEnergyTile;
+import ic2.api.reactor.IReactor;
 import net.minecraft.block.Block;
 import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
@@ -22,6 +24,8 @@ public class ReactorTurbineTileEntity extends TileEntity implements ITickable
 	public BasicSource ic2EnergySource = new BasicSource(this, 1024, 3);
 	private EnergyStorage energyStorage = new EnergyStorage();
 	private TurbineBlockPositions positions = new TurbineBlockPositions();
+	private ReactorTurbineTileEntity mainTurbine;
+	public IReactor reactor;
 	private int turbineSoundLoopTimer;
 	private int alarmSoundLoopTimer;
 	private int coolingTimer;
@@ -30,17 +34,13 @@ public class ReactorTurbineTileEntity extends TileEntity implements ITickable
 	private int enclosureCheckTimer;
 	private float reactorHeatGoal;
 	private float currentHeatPercentage;
-	private boolean noReactor;
 	private boolean built;
 	private boolean located;
-	private boolean outOfWater;
-	private TileEntity mainTurbine;
-	public TileEntity reactorTileEntity;
+	private boolean outOfWater;	
 	public double currentGeneration;
 	public int reactorHeat;
 	public int numTurbines;
-	public boolean hasReactor;
-	public boolean isAdjacent;
+	public boolean isMainTurbine;
 	public boolean mainTurbineLoaded;
 	public boolean adjacentTurbinesLoaded;
 	public boolean enclosureIntact;
@@ -84,7 +84,7 @@ public class ReactorTurbineTileEntity extends TileEntity implements ITickable
 	{
 		if (world != null)
 		{
-			if (!world.isRemote) 
+			if (world.isRemote == false)
 			{
 				// Get the x,y,z position of relevant blocks.
 				if (located == false)
@@ -92,21 +92,10 @@ public class ReactorTurbineTileEntity extends TileEntity implements ITickable
 					positions.getPositions(pos);
 					located = true;
 				}
-				
-				// Get all info needed as the main turbine.
-				getMainTurbineInfo();
-				
-				if (noReactor == true) // This is not the main turbine.
+								
+				if (aboveReactor()) // This is the primary turbine.
 				{
-					// Get all info needed as an adjacent turbine.
-					getAdjacentTurbineInfo();
-				}
-				
-				// This is the primary turbine.
-				if (hasReactor == true) 
-				{
-					countAdjacentTurbines();
-					if (numTurbines == 5) // System is not active until all 5 turbines are in place.
+					if (adjacentTurbineCount() == 5) // System is not active until all 5 turbines are in place.
 					{
 						if (mainTurbineLoaded == true && adjacentTurbinesLoaded == false) 
 						{		
@@ -134,18 +123,18 @@ public class ReactorTurbineTileEntity extends TileEntity implements ITickable
 						}
 					}
 				}
-				else if (isAdjacent == true)
-				{					
-					ReactorTurbineTileEntity turbine = ((ReactorTurbineTileEntity) mainTurbine); // The main turbine.
-					if (turbine != null)
+				else
+				{		
+					// Get all info needed as an adjacent turbine.
+					if (getMainTurbine() != null)
 					{
-						if (turbine.mainTurbineLoaded == false)
+						if (mainTurbine.mainTurbineLoaded == false)
 						{							
 							reloadMainTurbine();
 						}
 						else
 						{							
-							generateAsAdjacent(turbine);
+							generateAsAdjacent();
 						}
 					}
 				}
@@ -153,91 +142,59 @@ public class ReactorTurbineTileEntity extends TileEntity implements ITickable
 		}
 	}
 
-	// Get all info needed as the main turbine.
-	private void getMainTurbineInfo()
+	// Check for rector below the turbine.
+	private boolean aboveReactor()
 	{
 		if (world.getBlockState(positions.reactorPos) != null)
 		{
 			if (world.getBlockState(positions.reactorPos).getBlock() != null)
 			{
-				reactorTileEntity = world.getTileEntity(positions.reactorPos);
-				if (reactorTileEntity != null)
-				{
-					if (reactorTileEntity instanceof ic2.api.reactor.IReactor) // There is a reactor below the turbine.
-					{						
-						hasReactor = true; // This is the main turbine, directly over the reactor.
-						isAdjacent = false; // This is not an adjacent turbine.
-						noReactor = false; // There is a reactor below this turbine.
-						reactorHeat = ((ic2.api.reactor.IReactor) reactorTileEntity).getHeat(); // Amount of heat in the reactor this tick.
-					}
-					else // There was no reactor found below this turbine.
-					{
-						if (hasReactor == true)
-						{
-							mainTurbineLoaded = false; // The reactor was there but no longer exists.
-						}
-						hasReactor = false;
-						isAdjacent = false;
-						noReactor = true;
-						reactorHeat = 0;
-					}
-				}
-				else // There was no tile entity found below this turbine.
-				{
-					if (hasReactor == true)
-					{
-						mainTurbineLoaded = false; // The reactor was there but no longer exists.
-					}
-					hasReactor = false;
-					isAdjacent = false;
-					noReactor = true;					
-					reactorHeat = 0;
+				reactor = (IReactor) world.getTileEntity(positions.reactorPos);
+				if (reactor != null)
+				{					
+					isMainTurbine = true; // This is the main turbine, directly over the reactor.						
+					return true;
 				}
 			}
 		}
+		if (isMainTurbine == true)
+		{
+			mainTurbineLoaded = false; // The reactor was there but no longer exists.
+		}
+		isMainTurbine = false;
+		return false;
 	}
 
 	// Get all info needed as an adjacent turbine.
-	private void getAdjacentTurbineInfo()
+	private ReactorTurbineTileEntity getMainTurbine()
 	{
 		for (BlockPos p : positions.adjacentTurbinePositions)
 		{
-			if (isAdjacent == false)
+			if (world.getBlockState(p) != null)
 			{
-				if (world.getBlockState(p) != null)
+				if (world.getBlockState(p).getBlock() != null)
 				{
-					if (world.getBlockState(p).getBlock() != null)
-					{
-						mainTurbine = world.getTileEntity(p);
-						if (mainTurbine != null)
-						{						
-							if (mainTurbine instanceof ReactorTurbineTileEntity)
+					TileEntity tileEntityAtPosition = world.getTileEntity(p);
+					if (tileEntityAtPosition != null)
+					{						
+						if (tileEntityAtPosition instanceof ReactorTurbineTileEntity)
+						{
+							if (((ReactorTurbineTileEntity) tileEntityAtPosition).isMainTurbine == true) // This turbine is adjacent to the main turbine.
 							{
-								if (((ReactorTurbineTileEntity) mainTurbine).hasReactor == true) // This turbine is adjacent to the main turbine.
-								{
-									hasReactor = false;
-									isAdjacent = true;
-									noReactor = false;
-									positions.mainTurbinePos = p;
-									reactorHeat = ((ReactorTurbineTileEntity) mainTurbine).reactorHeat; // Amount of heat in the reactor this tick.
-								}
+								positions.mainTurbinePos = p;	
+								mainTurbine = (ReactorTurbineTileEntity) tileEntityAtPosition;
+								return mainTurbine;
 							}
 						}
 					}
 				}
 			}			
 		}
-		if (isAdjacent == false)
-		{
-			hasReactor = false;
-			isAdjacent = false;
-			noReactor = true;
-			reactorHeat = 0;
-		}
+		return null;
 	}
 	
 	// Counts the number of adjacent turbines around this block.
-	private void countAdjacentTurbines()
+	private int adjacentTurbineCount()
 	{
 		numTurbines = 1;
 		for (BlockPos p : positions.adjacentTurbinePositions)
@@ -251,7 +208,7 @@ public class ReactorTurbineTileEntity extends TileEntity implements ITickable
 					{
 						if (adjacentTileEntity instanceof ReactorTurbineTileEntity)
 						{
-							if (((ReactorTurbineTileEntity) adjacentTileEntity).hasReactor == false)
+							if (((ReactorTurbineTileEntity) adjacentTileEntity).isMainTurbine == false)
 							{
 								numTurbines++;
 							}
@@ -260,6 +217,7 @@ public class ReactorTurbineTileEntity extends TileEntity implements ITickable
 				}
 			}
 		}
+		return numTurbines;
 	}
 	
 	// Replaces adjacent turbines when the world is loaded so IC2 cables will connect to them.
@@ -290,54 +248,46 @@ public class ReactorTurbineTileEntity extends TileEntity implements ITickable
 	}
 	
 	// Checks for missing blocks in enclosure positions.
-	private void checkEnclosure()
+	private boolean checkEnclosure()
 	{
-		boolean foundMissingBlock = false;
 		for (BlockPos p : positions.enclosurePositions)
 		{
 			Block b = world.getBlockState(p).getBlock();
 			if (b == Blocks.AIR || b == Blocks.WATER || b == Blocks.FLOWING_WATER)
 			{
-				foundMissingBlock = true;
+				enclosureIntact = false;
+				return enclosureIntact;
 			}
 		}
-		if (foundMissingBlock == true)
-		{
-			enclosureIntact = false;
-		}
-		else
-		{
-			enclosureIntact = true;
-		}
+		enclosureIntact = true;
+		return enclosureIntact;
 	}
 	
 	// Generate power as the main turbine.
 	private void generateAsMain()
 	{
-		ic2.api.reactor.IReactor reactor = (ic2.api.reactor.IReactor) reactorTileEntity;
 		if (reactor != null)
 		{	
-			checkForWater();
-			if (outOfWater == false)
+			checkForDisallowedConnections();	
+			
+			negateReactorOutput(reactor);
+			
+			reactorHeat = reactor.getHeat(); // Amount of heat in the reactor this tick.
+			
+			if (reactorHeat >= 1) // The reactor is hot enough to operate the turbine.
 			{
-				checkForDisallowedConnections();
+				reactorHeatGoal = reactor.getMaxHeat() * 0.25f; // Heat required for optimal output is 25% of max reactor heat.
+				currentHeatPercentage = reactor.getHeat() / reactorHeatGoal; // How close the reactor is to 25% max heat.			
 				
-				if (reactor.getReactorEUEnergyOutput() > 0)
+				if (currentHeatPercentage >= 1.5f) // Reactor is too hot.
 				{
-					// ic2 experimental reactor GUI will display power generated by turbines.
-					reactor.addOutput(reactor.getReactorEnergyOutput() * -1); 
+					soundAlarm();
 				}
-
-				if (reactorHeat >= 1) // The reactor is hot enough to operate the turbine.
+				
+				checkForWater();
+				
+				if (outOfWater == false)
 				{
-					reactorHeatGoal = reactor.getMaxHeat() * 0.25f; // Heat required for optimal output is 25% of max reactor heat.
-					currentHeatPercentage = reactor.getHeat() / reactorHeatGoal; // How close the reactor is to 25% max heat.
-					
-					if (currentHeatPercentage >= 1.5f) // Reactor is too hot.
-					{
-						soundAlarm();
-					}
-					
 					currentGeneration = 512 * currentHeatPercentage * ConfigHandler.getPowerMultiplier(); // Energy added to buffer each tick.
 					
 					if (currentGeneration > 512)
@@ -370,16 +320,11 @@ public class ReactorTurbineTileEntity extends TileEntity implements ITickable
 						turbineSoundLoopTimer = 0;
 					}
 				}
-			}			
-			else
-			{
-				soundAlarm();
-				killReactorOutput(reactor);
-			}
+			}		
 		}
 	}
 	
-	// Replaces the main turbine when the world is loaded so it will reconnect to the reactor.
+	// Replaces the main turbine so it will connect to the reactor.
 	private void reloadMainTurbine()
 	{
 		world.setBlockToAir(positions.mainTurbinePos);
@@ -389,22 +334,22 @@ public class ReactorTurbineTileEntity extends TileEntity implements ITickable
 	}
 	
 	// Generate power as an adjacent turbine.
-	private void generateAsAdjacent(ReactorTurbineTileEntity turbine)
+	private void generateAsAdjacent()
 	{
-		if (turbine.reactorTileEntity != null)
+		if (mainTurbine.reactor != null)
 		{
-			if (turbine.numTurbines == 5 && turbine.enclosureIntact == true)
+			if (mainTurbine.numTurbines == 5 && mainTurbine.enclosureIntact == true)
 			{
-				ic2.api.reactor.IReactor reactor = (ic2.api.reactor.IReactor) turbine.reactorTileEntity; // The reactor below the main turbine.
-				if (reactor != null)
+				if (mainTurbine.reactor != null)
 				{		
 					checkForWater();
 					if (outOfWater == false)
 					{
+						reactorHeat = mainTurbine.reactorHeat; // Amount of heat in the reactor this tick.
 						if (reactorHeat >= 1)
 						{
-							reactorHeatGoal = reactor.getMaxHeat() * 0.25f; // Heat required for optimal output is 25% of max reactor heat.
-							currentHeatPercentage = reactor.getHeat() / reactorHeatGoal; // How close the reactor is to 25% max heat.
+							reactorHeatGoal = mainTurbine.reactor.getMaxHeat() * 0.25f; // Heat required for optimal output is 25% of max reactor heat.
+							currentHeatPercentage = mainTurbine.reactor.getHeat() / reactorHeatGoal; // How close the reactor is to 25% max heat.
 							currentGeneration = 512 * currentHeatPercentage * ConfigHandler.getPowerMultiplier(); // EU added to buffer each tick.
 							if (currentGeneration > 512)
 							{
@@ -430,7 +375,7 @@ public class ReactorTurbineTileEntity extends TileEntity implements ITickable
 					TileEntity disallowedConnection = world.getTileEntity(p);
 					if (disallowedConnection != null)
 					{
-						if (disallowedConnection instanceof ic2.api.energy.tile.IEnergyTile || disallowedConnection instanceof ic2.core.block.wiring.TileEntityTransformer || disallowedConnection instanceof ic2.core.block.wiring.TileEntityElectricBlock || disallowedConnection instanceof ic2.core.block.machine.tileentity.TileEntityStandardMachine || disallowedConnection instanceof ic2.core.block.machine.tileentity.TileEntityElectricMachine || disallowedConnection instanceof ic2.core.block.wiring.TileEntityCable)
+						if (disallowedConnection instanceof IEnergyTile || disallowedConnection instanceof ic2.core.block.wiring.TileEntityTransformer || disallowedConnection instanceof ic2.core.block.wiring.TileEntityElectricBlock || disallowedConnection instanceof ic2.core.block.machine.tileentity.TileEntityStandardMachine || disallowedConnection instanceof ic2.core.block.machine.tileentity.TileEntityElectricMachine || disallowedConnection instanceof ic2.core.block.wiring.TileEntityCable)
 						{
 							world.setBlockToAir(p); 
 						}
@@ -441,7 +386,7 @@ public class ReactorTurbineTileEntity extends TileEntity implements ITickable
 	}
 	
 	// Removes heat from the reactor.
-	private void coolReactor(ic2.api.reactor.IReactor reactor)
+	private void coolReactor(IReactor reactor)
 	{
 		if (currentHeatPercentage < 0.2f)
 		{
@@ -497,13 +442,13 @@ public class ReactorTurbineTileEntity extends TileEntity implements ITickable
 		Block waterBlock = world.getBlockState(positions.thisTurbineWaterPos).getBlock();
 		if (waterBlock != Blocks.WATER) // There is no water below the turbine.
 		{
-			if (outOfWater == false) // The reactor has gone without water for less than ~10 seconds.
+			if (outOfWater == false) // The turbine has gone without water for less than ~10 seconds.
 			{
 				outOfWaterTimer++;
 				if (outOfWaterTimer >= 200)
 				{
 					outOfWaterTimer = 0;
-					outOfWater = true; // The reactor has gone without water for ~10 seconds or greater.
+					outOfWater = true; // The turbine has gone without water for ~10 seconds or greater.
 				}
 			}
 		}
@@ -528,8 +473,8 @@ public class ReactorTurbineTileEntity extends TileEntity implements ITickable
 		waterEvaporated = 0;
 	}
 	
-	// ic2 experimental reactor GUI will show that the reactor is no longer generating power.
-	private void killReactorOutput(ic2.api.reactor.IReactor reactor)
+	// Turbines take over reactor output for ic2 GUI display.
+	private void negateReactorOutput(IReactor reactor)
 	{		
 		if (reactor.getReactorEUEnergyOutput() > 0)
 		{
