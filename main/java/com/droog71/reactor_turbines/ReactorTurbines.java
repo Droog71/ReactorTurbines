@@ -6,7 +6,6 @@ import com.droog71.reactor_turbines.config.ConfigHandler;
 import com.droog71.reactor_turbines.init.ReactorTurbineBlocks;
 import com.droog71.reactor_turbines.init.ReactorTurbineItems;
 import com.droog71.reactor_turbines.init.ReactorTurbineSounds;
-
 import net.minecraft.creativetab.CreativeTabs;
 import net.minecraft.item.ItemStack;
 import net.minecraftforge.fml.common.Mod;
@@ -21,7 +20,7 @@ public class ReactorTurbines
 {
     public static final String MODID = "reactor_turbines";
     public static final String NAME = "Reactor Turbines";
-    public static final String VERSION = "1.2.1";
+    public static final String VERSION = "1.2.2";
     private static Logger logger;
 
     @Instance

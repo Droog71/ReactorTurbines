@@ -6,12 +6,10 @@
     " P "  ],
   "key": {
     "V": {
-        "item": "ic2:component_heat_vent",
-        "item": "ic2:itemreactorventspread"
+        "item": "ic2:component_heat_vent"
     },
     "P": {
-        "item": "ic2:plating",
-        "item": "ic2:itemreactorplating"
+        "item": "ic2:plating"
     }
 },
   "result": {
